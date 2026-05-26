@@ -1,0 +1,31 @@
+# Secrets & local config
+functions/local.settings.json
+*.env
+.env*
+
+# Terraform state & secrets
+terraform/
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+
+# Video file (too large)
+*.mp4
+*.avi
+*.mov
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+.python_packages/
+*.egg-info/
+
+# VS Code
+.vscode/
+.codesight/
+
+# Assignment & misc
+asignment.txt
