@@ -1,0 +1,6 @@
+ultralytics
+opencv-python-headless
+numpy
+azure-storage-blob
+azure-eventhub
+lap
