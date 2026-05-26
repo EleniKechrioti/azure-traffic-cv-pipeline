@@ -1,0 +1,81 @@
+{
+  "title": "Traffic CV Pipeline",
+  "uid": "traffic-cv",
+  "version": 1,
+  "schemaVersion": 36,
+  "refresh": "15s",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Avg Speed per Lane per 5min (Q7)",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "avg_speed_per_lane",
+          "legendFormat": "{{lane}} - {{window}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Vehicle Count per Lane per 5min (Q5)",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "vehicle_count_per_lane",
+          "legendFormat": "{{lane}} - {{window}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Truck Ratio per Lane (Q2)",
+      "type": "bargauge",
+      "gridPos": { "x": 0, "y": 8, "w": 8, "h": 6 },
+      "targets": [
+        {
+          "expr": "truck_ratio_per_lane",
+          "legendFormat": "{{lane}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Speeders by Vehicle Type (Q3)",
+      "type": "stat",
+      "gridPos": { "x": 8, "y": 8, "w": 8, "h": 6 },
+      "targets": [
+        {
+          "expr": "speeders_total",
+          "legendFormat": "{{type}}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Trucks Outside Far-Left Lane (Q8)",
+      "type": "stat",
+      "gridPos": { "x": 16, "y": 8, "w": 8, "h": 6 },
+      "targets": [
+        {
+          "expr": "trucks_not_far_left_total",
+          "legendFormat": "Total"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Clip Processing Duration p95 (Latency)",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 14, "w": 24, "h": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(clip_processing_duration_seconds_bucket[5m]))",
+          "legendFormat": "p95 latency"
+        }
+      ]
+    }
+  ]
+}
