@@ -58,10 +58,8 @@ def load_data(path: str) -> tuple:
         data = json.load(f)
 
     if isinstance(data, list):
-        # Παλιά μορφή — local testing με cv_results.json
         return data, 0.0, 0.0
     else:
-        # Νέα μορφή — από worker
         vehicles = data.get("vehicles", [])
         clip_start_sec = data.get("clip_start_sec", 0.0)
         latency = data.get("processing_latency_sec", 0.0)
@@ -79,8 +77,12 @@ def download_from_blob(blob_path: str, local_path: str):
     logger.info(f"Downloaded {blob_path} → {local_path}")
 
 
-def get_5min_window(timestamp_sec: float, clip_start_sec: float) -> int:
-    return int((clip_start_sec + timestamp_sec) // 300)
+def get_5min_window(timestamp_sec: float) -> int:
+    """
+    Τα timestamps στο JSON είναι ήδη absolute (clip_start_sec + relative_time).
+    Άρα δεν χρειάζεται πρόσθεση — απλά διαιρούμε με 300.
+    """
+    return int(timestamp_sec // 300)
 
 
 def window_label(window_idx: int) -> str:
@@ -134,10 +136,10 @@ def query3_speed_violations(vehicles: list) -> dict:
 
 # QUERY 5 — Αριθμός οχημάτων ανά ρεύμα και ανά 5λεπτο
 
-def query5_vehicles_per_stream_per_window(vehicles: list, clip_start_sec: float) -> dict:
+def query5_vehicles_per_stream_per_window(vehicles: list) -> dict:
     counts = defaultdict(lambda: defaultdict(int))
     for v in vehicles:
-        w = get_5min_window(v["timestamp"], clip_start_sec)
+        w = get_5min_window(v["timestamp"])
         counts[w][v["stream"]] += 1
 
     logger.info("=== QUERY 5: Αριθμός οχημάτων ανά ρεύμα και ανά 5λεπτο ===")
@@ -152,10 +154,10 @@ def query5_vehicles_per_stream_per_window(vehicles: list, clip_start_sec: float)
 
 # QUERY 6 — Top 10 γρήγορα / αργά ανά ρεύμα και 5λεπτο
 
-def query6_top_speeds(vehicles: list, clip_start_sec: float) -> dict:
+def query6_top_speeds(vehicles: list) -> dict:
     grouped = defaultdict(lambda: defaultdict(list))
     for v in vehicles:
-        w = get_5min_window(v["timestamp"], clip_start_sec)
+        w = get_5min_window(v["timestamp"])
         grouped[w][v["stream"]].append({"id": v["vehicle_id"], "speed": v["speed_kmh"]})
 
     logger.info("=== QUERY 6: Top 10 πιο γρήγορα/αργά ανά ρεύμα και 5λεπτο ===")
@@ -178,10 +180,10 @@ def query6_top_speeds(vehicles: list, clip_start_sec: float) -> dict:
 
 # QUERY 7 — Μέση ταχύτητα ανά ρεύμα και ανά 5λεπτο
 
-def query7_avg_speed(vehicles: list, clip_start_sec: float) -> dict:
+def query7_avg_speed(vehicles: list) -> dict:
     grouped = defaultdict(lambda: defaultdict(list))
     for v in vehicles:
-        w = get_5min_window(v["timestamp"], clip_start_sec)
+        w = get_5min_window(v["timestamp"])
         grouped[w][v["stream"]].append(v["speed_kmh"])
 
     logger.info("=== QUERY 7: Μέση ταχύτητα ανά ρεύμα και ανά 5λεπτο ===")
@@ -255,8 +257,8 @@ def main():
     parser.add_argument("--input", default=None,
                         help="Local path στο JSON (για local testing). "
                              "Αν δεν οριστεί, χρησιμοποιείται το BLOB_INPUT_PATH env var.")
-    parser.add_argument("--clip_id", default=os.environ.get("CLIP_ID", "clip_01"),
-                        help="Αναγνωριστικό clip (default: clip_01 ή env CLIP_ID)")
+    parser.add_argument("--clip_id", default=os.environ.get("CLIP_ID", "clip_000"),
+                        help="Αναγνωριστικό clip (default: clip_000 ή env CLIP_ID)")
     parser.add_argument("--push_gw", default=os.environ.get("PUSHGATEWAY_URL", "http://localhost:9091"),
                         help="URL Prometheus Pushgateway")
     parser.add_argument("--output_dir", default="output",
@@ -265,12 +267,11 @@ def main():
 
     setup_loggers(args.output_dir, args.clip_id)
 
-    # Αν δεν δοθεί --input, κατεβάζουμε από Blob (Azure mode)
     if args.input:
         local_path = args.input
         logger.info(f"Local mode: φόρτωση από {local_path}")
     else:
-        blob_path = os.environ["BLOB_INPUT_PATH"]  # π.χ. "cv-processor-results/clip_01_results.json"
+        blob_path = os.environ["BLOB_INPUT_PATH"]
         local_path = f"/tmp/{args.clip_id}_results.json"
         logger.info(f"Azure mode: κατέβασμα από Blob {blob_path}")
         download_from_blob(blob_path, local_path)
@@ -281,9 +282,9 @@ def main():
     q1 = query1_vehicle_speeds(vehicles)
     q2 = query2_truck_percentage(vehicles)
     q3 = query3_speed_violations(vehicles)
-    q5 = query5_vehicles_per_stream_per_window(vehicles, clip_start_sec)
-    q6 = query6_top_speeds(vehicles, clip_start_sec)
-    q7 = query7_avg_speed(vehicles, clip_start_sec)
+    q5 = query5_vehicles_per_stream_per_window(vehicles)
+    q6 = query6_top_speeds(vehicles)
+    q7 = query7_avg_speed(vehicles)
     q8 = query8_trucks_not_far_left(vehicles)
 
     push_to_prometheus(
