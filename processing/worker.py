@@ -4,12 +4,16 @@ import logging
 import json
 import time
 from azure.storage.blob import BlobServiceClient
+from azure.eventhub import EventHubConsumerClient
+from azure.eventhub.extensions.checkpointstoreblob import BlobCheckpointStore
 from cv_process import TrafficAnalyzer
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-CONN_STR = os.environ["STORAGE_CONNECTION_STRING"]
-BLOB_PATH = os.environ["INPUT_BLOB_PATH"]  # π.χ. "clips/clip_001.mp4"
+CONN_STR    = os.environ["STORAGE_CONNECTION_STRING"]
+EH_CONN_STR = os.environ["EVENTHUB_CONNECTION_STRING"]
+EH_NAME     = os.environ.get("EVENTHUB_NAME", "clips-topic")
+EH_GROUP    = os.environ.get("EVENTHUB_CONSUMER_GROUP", "cv-workers")
 
 blob_service_client = BlobServiceClient.from_connection_string(CONN_STR)
 analyzer = TrafficAnalyzer()
@@ -18,8 +22,8 @@ analyzer = TrafficAnalyzer()
 def get_clip_number(blob_name: str) -> int:
     """
     Εξάγει τον αύξοντα αριθμό από το όνομα του clip.
-    π.χ. "clips/clip_001.mp4" → 1
-         "clip_003.mp4"       → 3
+    π.χ. "clips-2min/clip_001.mp4" → 1
+         "clip_003.mp4"            → 3
     """
     filename = blob_name.split("/")[-1]          # clip_001.mp4
     name = filename.replace(".mp4", "")          # clip_001
@@ -27,10 +31,10 @@ def get_clip_number(blob_name: str) -> int:
     return int(number_str)
 
 
-def main():
-    logging.info(f"Worker started for: {BLOB_PATH}")
+def process_clip(blob_path: str):
+    logging.info(f"Worker started for: {blob_path}")
 
-    container_name, blob_name = BLOB_PATH.split("/", 1)
+    container_name, blob_name = blob_path.split("/", 1)
 
     # Υπολογισμός clip_start_sec από το όνομα του clip
     clip_number = get_clip_number(blob_name)
@@ -76,6 +80,27 @@ def main():
         )
         res_blob_client.upload_blob(json.dumps(output, indent=4), overwrite=True)
         logging.info("Done.")
+
+
+def on_event(partition_context, event):
+    body = json.loads(event.body_as_str())
+    blob_path = body["blob"]  # e.g. "clips-2min/clip_001.mp4"
+    logging.info(f"Received event: {blob_path}")
+    process_clip(blob_path)
+    partition_context.update_checkpoint(event)
+
+
+def main():
+    checkpoint_store = BlobCheckpointStore.from_connection_string(
+        CONN_STR, container_name="eventhub-checkpoints"
+    )
+    client = EventHubConsumerClient.from_connection_string(
+        EH_CONN_STR, consumer_group=EH_GROUP, eventhub_name=EH_NAME,
+        checkpoint_store=checkpoint_store
+    )
+    logging.info(f"Listening on {EH_NAME} / {EH_GROUP} ...")
+    with client:
+        client.receive(on_event=on_event, starting_position="-1")
 
 
 if __name__ == "__main__":

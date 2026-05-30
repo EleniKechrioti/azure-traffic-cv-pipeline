@@ -3,4 +3,5 @@ opencv-python-headless
 numpy
 azure-storage-blob
 azure-eventhub
+azure-eventhub-checkpointstoreblob
 lap
