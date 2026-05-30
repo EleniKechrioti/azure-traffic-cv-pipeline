@@ -252,49 +252,82 @@ def push_to_prometheus(clip_id, q2, q3, q5, q7, q8, processing_latency_sec, push
 
 # MAIN
 
+def run_analytics(local_path: str, clip_id: str, push_gw: str):
+    """Run all queries on a local JSON file and push metrics."""
+    vehicles, clip_start_sec, latency = load_data(local_path)
+    logger.info(f"Σύνολο εγγραφών: {len(vehicles)} | clip_start: {clip_start_sec}s | latency: {latency}s")
+
+    query1_vehicle_speeds(vehicles)
+    q2 = query2_truck_percentage(vehicles)
+    q3 = query3_speed_violations(vehicles)
+    q5 = query5_vehicles_per_stream_per_window(vehicles)
+    query6_top_speeds(vehicles)
+    q7 = query7_avg_speed(vehicles)
+    q8 = query8_trucks_not_far_left(vehicles)
+
+    push_to_prometheus(
+        clip_id=clip_id,
+        q2=q2, q3=q3, q5=q5, q7=q7, q8=q8,
+        processing_latency_sec=latency,
+        pushgateway_url=push_gw,
+    )
+    logger.info(f"Analytics ολοκληρώθηκαν για {clip_id}.")
+
+
+def process_single_clip(blob_path: str, clip_id: str, push_gw: str, output_dir: str):
+    """Download a blob and run analytics on it."""
+    setup_loggers(output_dir, clip_id)
+    local_path = f"/tmp/{clip_id}_results.json"
+    logger.info(f"Azure mode: κατέβασμα από Blob {blob_path}")
+    download_from_blob(blob_path, local_path)
+    run_analytics(local_path, clip_id, push_gw)
+
+
+def list_result_blobs() -> list:
+    """List all JSON blobs in cv-processor-results container."""
+    conn_str = os.environ["STORAGE_CONNECTION_STRING"]
+    client = BlobServiceClient.from_connection_string(conn_str)
+    container_client = client.get_container_client("cv-processor-results")
+    blobs = []
+    for blob in container_client.list_blobs():
+        if blob.name.endswith("_results.json"):
+            blobs.append(blob.name)
+    return sorted(blobs)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Traffic Analytics — queries 1-3, 5-8")
     parser.add_argument("--input", default=None,
                         help="Local path στο JSON (για local testing). "
                              "Αν δεν οριστεί, χρησιμοποιείται το BLOB_INPUT_PATH env var.")
-    parser.add_argument("--clip_id", default=os.environ.get("CLIP_ID", "clip_000"),
-                        help="Αναγνωριστικό clip (default: clip_000 ή env CLIP_ID)")
+    parser.add_argument("--clip_id", default=os.environ.get("CLIP_ID", ""),
+                        help="Αναγνωριστικό clip (default: env CLIP_ID)")
     parser.add_argument("--push_gw", default=os.environ.get("PUSHGATEWAY_URL", "http://localhost:9091"),
                         help="URL Prometheus Pushgateway")
     parser.add_argument("--output_dir", default="output",
                         help="Φάκελος για τα log files (default: output/)")
     args = parser.parse_args()
 
-    setup_loggers(args.output_dir, args.clip_id)
-
     if args.input:
-        local_path = args.input
-        logger.info(f"Local mode: φόρτωση από {local_path}")
+        clip_id = args.clip_id or "clip_000"
+        setup_loggers(args.output_dir, clip_id)
+        logger.info(f"Local mode: φόρτωση από {args.input}")
+        run_analytics(args.input, clip_id, args.push_gw)
     else:
-        blob_path = os.environ["BLOB_INPUT_PATH"]
-        local_path = f"/tmp/{args.clip_id}_results.json"
-        logger.info(f"Azure mode: κατέβασμα από Blob {blob_path}")
-        download_from_blob(blob_path, local_path)
-
-    vehicles, clip_start_sec, latency = load_data(local_path)
-    logger.info(f"Σύνολο εγγραφών: {len(vehicles)} | clip_start: {clip_start_sec}s | latency: {latency}s")
-
-    q1 = query1_vehicle_speeds(vehicles)
-    q2 = query2_truck_percentage(vehicles)
-    q3 = query3_speed_violations(vehicles)
-    q5 = query5_vehicles_per_stream_per_window(vehicles)
-    q6 = query6_top_speeds(vehicles)
-    q7 = query7_avg_speed(vehicles)
-    q8 = query8_trucks_not_far_left(vehicles)
-
-    push_to_prometheus(
-        clip_id=args.clip_id,
-        q2=q2, q3=q3, q5=q5, q7=q7, q8=q8,
-        processing_latency_sec=latency,
-        pushgateway_url=args.push_gw,
-    )
-
-    logger.info("Analytics ολοκληρώθηκαν.")
+        blob_path = os.environ.get("BLOB_INPUT_PATH", "")
+        if blob_path:
+            clip_id = args.clip_id or blob_path.split("/")[-1].replace("_results.json", "")
+            process_single_clip(blob_path, clip_id, args.push_gw, args.output_dir)
+        else:
+            logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+            logger.info("Batch mode: processing all clips in cv-processor-results")
+            blobs = list_result_blobs()
+            logger.info(f"Found {len(blobs)} result blobs")
+            for blob_name in blobs:
+                clip_id = blob_name.replace("_results.json", "")
+                blob_full = f"cv-processor-results/{blob_name}"
+                process_single_clip(blob_full, clip_id, args.push_gw, args.output_dir)
+            logger.info(f"Batch analytics complete — processed {len(blobs)} clips.")
 
 
 if __name__ == "__main__":
