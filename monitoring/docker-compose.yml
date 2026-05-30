@@ -8,11 +8,13 @@ services:
       - "9091:9091"
 
   prometheus:
-    build: ./prometheus
+    image: prom/prometheus:v2.51.2
     container_name: prometheus
     restart: unless-stopped
     ports:
       - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     depends_on:
       - pushgateway
 
