@@ -4,7 +4,7 @@ import logging
 import json
 import time
 from azure.storage.blob import BlobServiceClient
-from azure.eventhub import EventHubConsumerClient
+from azure.eventhub import EventHubConsumerClient, EventHubProducerClient, EventData
 from azure.eventhub.extensions.checkpointstoreblob import BlobCheckpointStore
 from cv_process import TrafficAnalyzer
 
@@ -15,15 +15,21 @@ EH_CONN_STR = os.environ["EVENTHUB_CONNECTION_STRING"]
 EH_NAME     = os.environ.get("EVENTHUB_NAME", "clips-topic")
 EH_GROUP    = os.environ.get("EVENTHUB_CONSUMER_GROUP", "cv-workers")
 
+ALERTS_CONN_STR = os.environ.get("ALERTS_EVENTHUB_CONNECTION_STRING")
+ALERTS_EH_NAME  = os.environ.get("ALERTS_EVENTHUB_NAME", "alerts-topic")
+
 blob_service_client = BlobServiceClient.from_connection_string(CONN_STR)
 analyzer = TrafficAnalyzer()
 
+alert_producer = None
+if ALERTS_CONN_STR:
+    alert_producer = EventHubProducerClient.from_connection_string(
+        conn_str=ALERTS_CONN_STR, eventhub_name=ALERTS_EH_NAME
+    )
 
 def get_clip_number(blob_name: str) -> int:
     """
-    Εξάγει τον αύξοντα αριθμό από το όνομα του clip.
-    π.χ. "clips-2min/clip_001.mp4" → 1
-         "clip_003.mp4"            → 3
+    Extracts the clip number from the blob name.
     """
     filename = blob_name.split("/")[-1]          # clip_001.mp4
     name = filename.replace(".mp4", "")          # clip_001
@@ -36,7 +42,7 @@ def process_clip(blob_path: str):
 
     container_name, blob_name = blob_path.split("/", 1)
 
-    # Υπολογισμός clip_start_sec από το όνομα του clip
+    # Calculate start timestamp from clip number
     clip_number = get_clip_number(blob_name)
     clip_start_sec = clip_number * 120.0
     clip_id = f"clip_{clip_number:03d}"
@@ -56,13 +62,14 @@ def process_clip(blob_path: str):
         start_time = time.time()
         results = analyzer.process_clip(
             local_video_path,
-            chunk_start_timestamp=clip_start_sec
+            chunk_start_timestamp=clip_start_sec,
+            alert_callback=handle_realtime_alert
         )
         latency = round(time.time() - start_time, 2)
         logging.info(f"CV processing done in {latency}s | vehicles detected: {len(results)}")
 
-        # Κάνουμε τα vehicle IDs globally unique προσθέτοντας το clip prefix
-        # π.χ. vehicle_id=3 στο clip_001 → "clip_001_3"
+        # Make vehicle IDs globally unique by adding the clip prefix
+        # e.g., vehicle_id=3 in clip_001 → "clip_001_3"
         for vehicle in results:
             vehicle["vehicle_id"] = f"{clip_id}_{vehicle['vehicle_id']}"
 
@@ -81,6 +88,15 @@ def process_clip(blob_path: str):
         res_blob_client.upload_blob(json.dumps(output, indent=4), overwrite=True)
         logging.info("Done.")
 
+def handle_realtime_alert(alert_data):
+    if alert_producer:
+        try:
+            batch = alert_producer.create_batch()
+            batch.add(EventData(json.dumps(alert_data)))
+            alert_producer.send_batch(batch)
+            logging.info(f"Real-time alert sent to Azure: {alert_data}")
+        except Exception as e:
+            logging.error(f"Failed to send alert: {e}")
 
 def on_event(partition_context, event):
     body = json.loads(event.body_as_str())

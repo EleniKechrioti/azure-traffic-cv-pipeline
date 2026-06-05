@@ -34,7 +34,7 @@ class TrafficAnalyzer:
             
         return stream, lane_num
 
-    def process_clip(self, video_path, chunk_start_timestamp=0):
+    def process_clip(self, video_path, chunk_start_timestamp=0, alert_callback=None):
         """
         Processes a video clip and returns a list of detected vehicles with their speed and other info.
         """
@@ -124,7 +124,14 @@ class TrafficAnalyzer:
                                     results_list.append(event_data)
                                     
                                     if speed_kmh > self.alert_limit:
-                                        print(f"ALERT: {v_data['type']} (ID: {track_id}) με {round(speed_kmh,2)} km/h!")
+                                        if alert_callback is not None:
+                                            alert_callback({
+                                                "vehicle_id": int(track_id),
+                                                "type": v_data['type'],
+                                                "speed_kmh": round(speed_kmh, 2),
+                                                "stream": stream,
+                                                "timestamp": round(real_timestamp, 2)
+                                            })
                             
                             v_data['state'] = 'completed'
 
@@ -149,7 +156,16 @@ class TrafficAnalyzer:
                                     results_list.append(event_data)
                                     
                                     if speed_kmh > self.alert_limit:
-                                        print(f"ALERT: {v_data['type']} (ID: {track_id}) με {round(speed_kmh,2)} km/h!")
+                                        if alert_callback is not None:
+                                            alert_callback(
+                                                {
+                                                    "vehicle_id": int(track_id),
+                                                    "type": v_data['type'],
+                                                    "speed_kmh": round(speed_kmh, 2),
+                                                    "stream": stream,
+                                                    "timestamp": round(real_timestamp, 2)
+                                                }
+                                            )
                             
                             v_data['state'] = 'completed'
 
