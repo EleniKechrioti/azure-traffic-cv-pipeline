@@ -5,3 +5,4 @@
 azure-functions
 azure-identity
 azure-mgmt-appcontainers
+azure-storage-blob

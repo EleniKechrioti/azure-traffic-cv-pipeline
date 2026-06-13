@@ -194,7 +194,7 @@
     },
     {
       "id": 7,
-      "title": "Clips Active (unique jobs)",
+      "title": "Clips Processed",
       "type": "stat",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "x": 14, "y": 14, "w": 10, "h": 8 },
@@ -219,7 +219,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "count(count by (job) (trucks_not_far_left_total))",
+          "expr": "sum(cv_chunk_processing_seconds_count)",
           "legendFormat": "Clips"
         }
       ]

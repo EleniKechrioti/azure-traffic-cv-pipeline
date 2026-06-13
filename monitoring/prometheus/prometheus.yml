@@ -6,4 +6,4 @@ scrape_configs:
   - job_name: 'pushgateway'
     honor_labels: true
     static_configs:
-      - targets: ['vana-pushgateway']
+      - targets: ['vana-pushgateway.internal.gentlesea-17ccac60.germanywestcentral.azurecontainerapps.io:80']

@@ -102,9 +102,18 @@ def on_event(partition_context, event):
     body = json.loads(event.body_as_str())
     blob_path = body["blob"]  # e.g. "clips-2min/clip_001.mp4"
     logging.info(f"Received event: {blob_path}")
-    process_clip(blob_path)
+    
+    # Commit offset IMMEDIATELY — don't wait for processing
+    # This allows other replicas to read next message while we process
     partition_context.update_checkpoint(event)
-
+    logging.info(f"Checkpoint committed for {blob_path} — other replicas can now read next message")
+    
+    # Now process the clip (other replicas process in parallel)
+    try:
+        process_clip(blob_path)
+    except Exception as e:
+        logging.error(f"Failed to process {blob_path}: {e}")
+        # Note: offset already committed, so this message won't be retried
 
 def main():
     checkpoint_store = BlobCheckpointStore.from_connection_string(

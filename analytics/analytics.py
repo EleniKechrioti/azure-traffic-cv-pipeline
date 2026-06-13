@@ -2,6 +2,7 @@ import json
 import argparse
 import logging
 import os
+import time
 from collections import defaultdict
 from prometheus_client import CollectorRegistry, Gauge, Histogram, push_to_gateway
 from azure.storage.blob import BlobServiceClient
@@ -213,7 +214,7 @@ def query8_trucks_not_far_left(vehicles: list) -> dict:
 
 # PROMETHEUS PUSH
 
-def push_to_prometheus(clip_id, q2, q3, q5, q7, q8, processing_latency_sec, pushgateway_url):
+def push_to_prometheus(clip_id, q2, q3, q5, q7, q8, processing_latencies, pushgateway_url):
     registry = CollectorRegistry()
 
     g_truck_pct = Gauge("truck_percentage_per_stream", "Ποσοστό φορτηγών ανά ρεύμα",
@@ -241,21 +242,33 @@ def push_to_prometheus(clip_id, q2, q3, q5, q7, q8, processing_latency_sec, push
 
     h = Histogram("cv_chunk_processing_seconds", "Latency επεξεργασίας clip (CV Worker)",
                   buckets=[5, 10, 15, 20, 30, 45, 60, 90, 120], registry=registry)
-    h.observe(processing_latency_sec)
+    for latency in processing_latencies:
+        if latency and latency > 0:
+            h.observe(latency)
 
-    try:
-        push_to_gateway(pushgateway_url, job=f"analytics_{clip_id}", registry=registry)
-        logger.info(f"Metrics pushed to Prometheus για {clip_id}")
-    except Exception as e:
-        logger.error(f"Αποτυχία push στο Prometheus: {e}")
+    # Push metrics with retry logic
+    max_retries = 3
+    retry_delay = 2
+    for attempt in range(1, max_retries + 1):
+        try:
+            push_to_gateway(pushgateway_url, job=f"analytics_{clip_id}", registry=registry, timeout=30)
+            logger.info(f"Metrics pushed to Prometheus για {clip_id}")
+            break
+        except Exception as e:
+            logger.error(f"Attempt {attempt} failed: {e}")
+            if attempt < max_retries:
+                time.sleep(retry_delay)
+                retry_delay *= 2  # Exponential backoff
+            else:
+                logger.error(f"Failed to push metrics after {max_retries} attempts: {e}")
 
 
 # MAIN
 
-def run_analytics(local_path: str, clip_id: str, push_gw: str):
-    """Run all queries on a local JSON file and push metrics."""
-    vehicles, clip_start_sec, latency = load_data(local_path)
-    logger.info(f"Σύνολο εγγραφών: {len(vehicles)} | clip_start: {clip_start_sec}s | latency: {latency}s")
+def run_queries_and_push(vehicles: list, latencies: list, clip_id: str, push_gw: str):
+    """Run all queries over a combined vehicle list and push a single metric group."""
+    logger.info(f"Σύνολο εγγραφών: {len(vehicles)} | clips: {len(latencies)} | "
+                f"avg latency: {round(sum(latencies) / len(latencies), 2) if latencies else 0.0}s")
 
     query1_vehicle_speeds(vehicles)
     q2 = query2_truck_percentage(vehicles)
@@ -268,10 +281,16 @@ def run_analytics(local_path: str, clip_id: str, push_gw: str):
     push_to_prometheus(
         clip_id=clip_id,
         q2=q2, q3=q3, q5=q5, q7=q7, q8=q8,
-        processing_latency_sec=latency,
+        processing_latencies=latencies,
         pushgateway_url=push_gw,
     )
     logger.info(f"Analytics ολοκληρώθηκαν για {clip_id}.")
+
+
+def run_analytics(local_path: str, clip_id: str, push_gw: str):
+    """Run all queries on a single local JSON file and push metrics."""
+    vehicles, clip_start_sec, latency = load_data(local_path)
+    run_queries_and_push(vehicles, [latency], clip_id, push_gw)
 
 
 def process_single_clip(blob_path: str, clip_id: str, push_gw: str, output_dir: str):
@@ -282,6 +301,26 @@ def process_single_clip(blob_path: str, clip_id: str, push_gw: str, output_dir: 
     download_from_blob(blob_path, local_path)
     run_analytics(local_path, clip_id, push_gw)
 
+
+def process_all_clips(blobs: list, push_gw: str, output_dir: str, clip_id: str = "all"):
+    """Download every result blob, combine all vehicles, and run analytics once.
+
+    The 5-minute windows in queries 5/6/7 span multiple 2-minute clips, so all
+    clips must be aggregated before windowing. Each clip's CV latency is observed
+    individually in the histogram (requirement 9).
+    """
+    setup_loggers(output_dir, clip_id)
+    all_vehicles = []
+    latencies = []
+    for blob_name in blobs:
+        local_path = f"/tmp/{blob_name}"
+        blob_full = f"cv-processor-results/{blob_name}"
+        download_from_blob(blob_full, local_path)
+        vehicles, _clip_start_sec, latency = load_data(local_path)
+        all_vehicles.extend(vehicles)
+        latencies.append(latency)
+
+    run_queries_and_push(all_vehicles, latencies, clip_id, push_gw)
 
 def list_result_blobs() -> list:
     """List all JSON blobs in cv-processor-results container."""
@@ -320,14 +359,11 @@ def main():
             process_single_clip(blob_path, clip_id, args.push_gw, args.output_dir)
         else:
             logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-            logger.info("Batch mode: processing all clips in cv-processor-results")
+            logger.info("Batch mode: aggregating all clips in cv-processor-results")
             blobs = list_result_blobs()
             logger.info(f"Found {len(blobs)} result blobs")
-            for blob_name in blobs:
-                clip_id = blob_name.replace("_results.json", "")
-                blob_full = f"cv-processor-results/{blob_name}"
-                process_single_clip(blob_full, clip_id, args.push_gw, args.output_dir)
-            logger.info(f"Batch analytics complete — processed {len(blobs)} clips.")
+            process_all_clips(blobs, args.push_gw, args.output_dir)
+            logger.info(f"Batch analytics complete — aggregated {len(blobs)} clips.")
 
 
 if __name__ == "__main__":
