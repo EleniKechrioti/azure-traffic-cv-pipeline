@@ -1,10 +1,18 @@
 {
   "title": "Traffic CV — Overview",
   "uid": "traffic-cv",
-  "version": 2,
+  "description": "Συνολική εικόνα του pipeline: ταχύτητες, οχήματα, παραβάσεις και latency επεξεργασίας.",
+  "tags": ["traffic", "overview"],
+  "version": 3,
   "schemaVersion": 36,
   "refresh": "15s",
   "time": { "from": "now-1h", "to": "now" },
+  "links": [
+    { "title": "Speed Analysis", "url": "/d/traffic-speed", "type": "link", "icon": "external link", "targetBlank": false },
+    { "title": "Vehicle Flow", "url": "/d/traffic-flow", "type": "link", "icon": "external link", "targetBlank": false },
+    { "title": "Compliance", "url": "/d/traffic-compliance", "type": "link", "icon": "external link", "targetBlank": false },
+    { "title": "System Health", "url": "/d/traffic-system", "type": "link", "icon": "external link", "targetBlank": false }
+  ],
   "panels": [
     {
       "id": 1,
@@ -149,21 +157,30 @@
     },
     {
       "id": 6,
-      "title": "Clip Processing Latency p95 (CV Worker)",
-      "type": "timeseries",
+      "title": "Clip Processing Latency — Histogram (CV Worker)",
+      "type": "barchart",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "x": 0, "y": 14, "w": 24, "h": 8 },
       "fieldConfig": {
         "defaults": {
-          "unit": "s",
-          "color": { "mode": "palette-classic" }
+          "unit": "short",
+          "color": { "mode": "fixed", "fixedColor": "blue" },
+          "custom": { "fillOpacity": 80 }
         }
+      },
+      "options": {
+        "orientation": "vertical",
+        "groupWidth": 0.7,
+        "barWidth": 0.9,
+        "xTickLabelRotation": 0,
+        "legend": { "displayMode": "hidden" }
       },
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "histogram_quantile(0.95, rate(cv_chunk_processing_seconds_bucket[5m]))",
-          "legendFormat": "p95 latency"
+          "expr": "sum by (le) (cv_chunk_processing_seconds_bucket)",
+          "legendFormat": "≤{{le}}s",
+          "instant": true
         }
       ]
     }
