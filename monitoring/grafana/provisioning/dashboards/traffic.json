@@ -7,50 +7,62 @@
   "schemaVersion": 36,
   "refresh": "15s",
   "time": { "from": "now-1h", "to": "now" },
-  "links": [
-    { "title": "Speed Analysis", "url": "/d/traffic-speed", "type": "link", "icon": "external link", "targetBlank": false },
-    { "title": "Vehicle Flow", "url": "/d/traffic-flow", "type": "link", "icon": "external link", "targetBlank": false },
-    { "title": "Compliance", "url": "/d/traffic-compliance", "type": "link", "icon": "external link", "targetBlank": false },
-    { "title": "System Health", "url": "/d/traffic-system", "type": "link", "icon": "external link", "targetBlank": false }
-  ],
   "panels": [
     {
       "id": 1,
       "title": "Avg Speed per Stream per 5min (Q7)",
-      "type": "timeseries",
+      "type": "barchart",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
       "fieldConfig": {
         "defaults": {
           "unit": "velocitykmh",
-          "color": { "mode": "palette-classic" }
+          "color": { "mode": "palette-classic" },
+          "custom": { "fillOpacity": 80, "lineWidth": 0 }
         }
+      },
+      "options": {
+        "orientation": "vertical",
+        "groupWidth": 0.7,
+        "barWidth": 0.9,
+        "xTickLabelRotation": -45,
+        "legend": { "displayMode": "list", "placement": "bottom" }
       },
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "avg by (stream, window) (avg_speed_kmh_per_stream_per_window)",
-          "legendFormat": "{{stream}} — {{window}}"
+          "legendFormat": "{{stream}} — {{window}}",
+          "instant": true
         }
       ]
     },
     {
       "id": 2,
       "title": "Vehicle Count per Stream per 5min (Q5)",
-      "type": "timeseries",
+      "type": "barchart",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
       "fieldConfig": {
         "defaults": {
           "unit": "short",
-          "color": { "mode": "palette-classic" }
+          "color": { "mode": "palette-classic" },
+          "custom": { "fillOpacity": 80, "lineWidth": 0 }
         }
+      },
+      "options": {
+        "orientation": "vertical",
+        "groupWidth": 0.7,
+        "barWidth": 0.9,
+        "xTickLabelRotation": -45,
+        "legend": { "displayMode": "list", "placement": "bottom" }
       },
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "sum by (stream, window) (vehicles_per_stream_per_window)",
-          "legendFormat": "{{stream}} — {{window}}"
+          "legendFormat": "{{stream}} — {{window}}",
+          "instant": true
         }
       ]
     },
@@ -64,13 +76,13 @@
         "defaults": {
           "unit": "percent",
           "min": 0,
-          "max": 100,
+          "max": 20,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               { "color": "green", "value": null },
-              { "color": "yellow", "value": 30 },
-              { "color": "red", "value": 60 }
+              { "color": "yellow", "value": 10 },
+              { "color": "red", "value": 15 }
             ]
           }
         }
@@ -102,8 +114,8 @@
             "mode": "absolute",
             "steps": [
               { "color": "green", "value": null },
-              { "color": "yellow", "value": 5 },
-              { "color": "red", "value": 20 }
+              { "color": "yellow", "value": 50 },
+              { "color": "red", "value": 100 }
             ]
           }
         }
@@ -111,7 +123,7 @@
       "options": {
         "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
         "colorMode": "background",
-        "graphMode": "area",
+        "graphMode": "none",
         "textMode": "auto"
       },
       "targets": [
@@ -135,8 +147,8 @@
             "mode": "absolute",
             "steps": [
               { "color": "green", "value": null },
-              { "color": "yellow", "value": 10 },
-              { "color": "red", "value": 30 }
+              { "color": "yellow", "value": 50 },
+              { "color": "red", "value": 100 }
             ]
           }
         }
@@ -144,7 +156,7 @@
       "options": {
         "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
         "colorMode": "background",
-        "graphMode": "area",
+        "graphMode": "none",
         "textMode": "auto"
       },
       "targets": [
@@ -165,7 +177,7 @@
         "defaults": {
           "unit": "short",
           "color": { "mode": "fixed", "fixedColor": "blue" },
-          "custom": { "fillOpacity": 80 }
+          "custom": { "fillOpacity": 80, "lineWidth": 0 }
         }
       },
       "options": {

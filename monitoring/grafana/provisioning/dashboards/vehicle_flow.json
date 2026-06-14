@@ -37,7 +37,7 @@
     },
     {
       "id": 2,
-      "title": "Trucks (All Streams)",
+      "title": "Avg Truck %",
       "type": "stat",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "x": 6, "y": 0, "w": 6, "h": 5 },
@@ -48,8 +48,8 @@
             "mode": "absolute",
             "steps": [
               { "color": "green", "value": null },
-              { "color": "yellow", "value": 30 },
-              { "color": "red", "value": 60 }
+              { "color": "yellow", "value": 10 },
+              { "color": "red", "value": 15 }
             ]
           }
         }
@@ -82,8 +82,8 @@
             "mode": "absolute",
             "steps": [
               { "color": "blue", "value": null },
-              { "color": "green", "value": 10 },
-              { "color": "yellow", "value": 50 }
+              { "color": "green", "value": 100 },
+              { "color": "yellow", "value": 300 }
             ]
           }
         }
@@ -104,51 +104,61 @@
     },
     {
       "id": 4,
-      "title": "Vehicle Count per Stream Over Time (Q5)",
-      "type": "timeseries",
+      "title": "Vehicle Count per Stream per 5min (Q5)",
+      "type": "barchart",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "x": 0, "y": 5, "w": 24, "h": 9 },
       "fieldConfig": {
         "defaults": {
           "unit": "short",
           "color": { "mode": "palette-classic" },
-          "custom": { "fillOpacity": 10, "lineWidth": 2 }
+          "custom": { "fillOpacity": 80, "lineWidth": 0 }
         }
       },
       "options": {
-        "legend": { "displayMode": "table", "placement": "right", "calcs": ["last", "max", "sum"] }
+        "orientation": "vertical",
+        "groupWidth": 0.7,
+        "barWidth": 0.9,
+        "xTickLabelRotation": -45,
+        "legend": { "displayMode": "list", "placement": "bottom" }
       },
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum by (stream) (vehicles_per_stream_per_window)",
-          "legendFormat": "{{stream}}"
+          "expr": "sum by (stream, window) (vehicles_per_stream_per_window)",
+          "legendFormat": "{{stream}} — {{window}}",
+          "instant": true
         }
       ]
     },
     {
       "id": 5,
-      "title": "Truck % per Stream Over Time (Q2)",
-      "type": "timeseries",
+      "title": "Truck % per Stream per Window (Q2)",
+      "type": "barchart",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "x": 0, "y": 14, "w": 12, "h": 8 },
       "fieldConfig": {
         "defaults": {
           "unit": "percent",
           "min": 0,
-          "max": 100,
+          "max": 20,
           "color": { "mode": "palette-classic" },
-          "custom": { "fillOpacity": 8 }
+          "custom": { "fillOpacity": 80, "lineWidth": 0 }
         }
       },
       "options": {
-        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["last", "mean"] }
+        "orientation": "vertical",
+        "groupWidth": 0.7,
+        "barWidth": 0.9,
+        "xTickLabelRotation": -45,
+        "legend": { "displayMode": "list", "placement": "bottom" }
       },
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "avg by (stream) (truck_percentage_per_stream)",
-          "legendFormat": "{{stream}}"
+          "legendFormat": "{{stream}}",
+          "instant": true
         }
       ]
     },
@@ -162,13 +172,13 @@
         "defaults": {
           "unit": "percent",
           "min": 0,
-          "max": 100,
+          "max": 20,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               { "color": "green", "value": null },
-              { "color": "yellow", "value": 30 },
-              { "color": "red", "value": 60 }
+              { "color": "yellow", "value": 10 },
+              { "color": "red", "value": 15 }
             ]
           }
         }
