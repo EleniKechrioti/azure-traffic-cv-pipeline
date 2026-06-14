@@ -1,31 +1,34 @@
 {
-  "title": "Traffic CV — Speed Analysis",
-  "uid": "traffic-speed",
-  "version": 1,
-  "schemaVersion": 36,
-  "refresh": "15s",
-  "time": {
-    "from": "now-1h",
-    "to": "now"
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
   },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 12,
+  "links": [],
   "panels": [
     {
-      "id": 1,
-      "title": "Total Speed Violations",
-      "type": "stat",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": {
-        "x": 0,
-        "y": 0,
-        "w": 6,
-        "h": 5
-      },
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -42,20 +45,35 @@
                 "value": 20
               }
             ]
-          }
-        }
+          },
+          "unit": "short"
+        },
+        "overrides": []
       },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
       "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
+          "fields": "",
           "values": false
         },
-        "colorMode": "background",
-        "graphMode": "none",
-        "textMode": "auto"
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
+      "pluginVersion": "10.4.2",
       "targets": [
         {
           "datasource": {
@@ -63,29 +81,23 @@
             "uid": "prometheus"
           },
           "expr": "sum(speed_violations_total)",
-          "legendFormat": "Violations"
+          "legendFormat": "Violations",
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Total Speed Violations",
+      "type": "stat"
     },
     {
-      "id": 2,
-      "title": "Avg Speed by Stream (Latest)",
-      "type": "bargauge",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": {
-        "x": 6,
-        "y": 0,
-        "w": 10,
-        "h": 5
-      },
       "fieldConfig": {
         "defaults": {
-          "unit": "velocitykmh",
-          "min": 0,
+          "mappings": [],
           "max": 130,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -106,20 +118,37 @@
                 "value": 110
               }
             ]
-          }
-        }
+          },
+          "unit": "velocitykmh"
+        },
+        "overrides": []
       },
+      "gridPos": {
+        "h": 5,
+        "w": 10,
+        "x": 6,
+        "y": 0
+      },
+      "id": 2,
       "options": {
+        "displayMode": "gradient",
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
+          "fields": "",
           "values": false
         },
-        "orientation": "horizontal",
-        "displayMode": "gradient",
-        "showUnfilled": true
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
       },
+      "pluginVersion": "10.4.2",
       "targets": [
         {
           "datasource": {
@@ -127,27 +156,21 @@
             "uid": "prometheus"
           },
           "expr": "avg by (stream) (avg_speed_kmh_per_stream_per_window)",
-          "legendFormat": "{{stream}}"
+          "legendFormat": "{{stream}}",
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Avg Speed by Stream (Latest)",
+      "type": "bargauge"
     },
     {
-      "id": 3,
-      "title": "Trucks Outside Far-Left Lane",
-      "type": "stat",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": {
-        "x": 16,
-        "y": 0,
-        "w": 8,
-        "h": 5
-      },
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -164,20 +187,35 @@
                 "value": 30
               }
             ]
-          }
-        }
+          },
+          "unit": "short"
+        },
+        "overrides": []
       },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "id": 3,
       "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
+          "fields": "",
           "values": false
         },
-        "colorMode": "background",
-        "graphMode": "none",
-        "textMode": "auto"
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
+      "pluginVersion": "10.4.2",
       "targets": [
         {
           "datasource": {
@@ -185,45 +223,89 @@
             "uid": "prometheus"
           },
           "expr": "sum(trucks_not_far_left_total)",
-          "legendFormat": "Total"
+          "legendFormat": "Total",
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Trucks Outside Far-Left Lane",
+      "type": "stat"
     },
     {
-      "id": 4,
-      "title": "Avg Speed per Stream Over Time (Q7)",
-      "type": "barchart",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": {
-        "x": 0,
-        "y": 5,
-        "w": 24,
-        "h": 9
-      },
       "fieldConfig": {
         "defaults": {
-          "unit": "velocitykmh",
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
             "fillOpacity": 80,
-            "lineWidth": 0
-          }
-        }
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 0,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "velocitykmh"
+        },
+        "overrides": []
       },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 4,
       "options": {
-        "orientation": "vertical",
-        "groupWidth": 0.7,
+        "barRadius": 0,
         "barWidth": 0.9,
-        "xTickLabelRotation": -45,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
         "legend": {
+          "calcs": [],
           "displayMode": "list",
-          "placement": "bottom"
-        }
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "vertical",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": -45,
+        "xTickLabelSpacing": 0
       },
       "targets": [
         {
@@ -232,48 +314,92 @@
             "uid": "prometheus"
           },
           "expr": "avg by (stream) (avg_speed_kmh_per_stream_per_window)",
+          "instant": true,
           "legendFormat": "{{stream}}",
-          "instant": true
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Avg Speed per Stream  (Q7)",
+      "type": "barchart"
     },
     {
-      "id": 5,
-      "title": "Truck % per Stream Over Time (Q2)",
-      "type": "barchart",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": {
-        "x": 0,
-        "y": 14,
-        "w": 12,
-        "h": 8
-      },
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
-          "min": 0,
-          "max": 100,
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
             "fillOpacity": 80,
-            "lineWidth": 0
-          }
-        }
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 0,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
       },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 14
+      },
+      "id": 5,
       "options": {
-        "orientation": "vertical",
-        "groupWidth": 0.7,
+        "barRadius": 0,
         "barWidth": 0.9,
-        "xTickLabelRotation": -45,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
         "legend": {
+          "calcs": [],
           "displayMode": "list",
-          "placement": "bottom"
-        }
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "vertical",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": -45,
+        "xTickLabelSpacing": 0
       },
       "targets": [
         {
@@ -282,47 +408,91 @@
             "uid": "prometheus"
           },
           "expr": "avg by (stream) (truck_percentage_per_stream)",
+          "instant": true,
           "legendFormat": "{{stream}}",
-          "instant": true
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Truck % per Stream  (Q2)",
+      "type": "barchart"
     },
     {
-      "id": 6,
-      "title": "Speed Violations Over Time (Q3)",
-      "type": "barchart",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": {
-        "x": 12,
-        "y": 14,
-        "w": 12,
-        "h": 8
-      },
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
           "color": {
-            "mode": "fixed",
-            "fixedColor": "red"
+            "fixedColor": "red",
+            "mode": "fixed"
           },
           "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
             "fillOpacity": 80,
-            "lineWidth": 0
-          }
-        }
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 0,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
       },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 14
+      },
+      "id": 6,
       "options": {
-        "orientation": "vertical",
-        "groupWidth": 0.7,
+        "barRadius": 0,
         "barWidth": 0.9,
-        "xTickLabelRotation": -45,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
         "legend": {
+          "calcs": [],
           "displayMode": "list",
-          "placement": "bottom"
-        }
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "vertical",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": -45,
+        "xTickLabelSpacing": 0
       },
       "targets": [
         {
@@ -331,10 +501,29 @@
             "uid": "prometheus"
           },
           "expr": "sum(speed_violations_total)",
+          "instant": true,
           "legendFormat": "Violations",
-          "instant": true
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Speed Violations  (Q3)",
+      "type": "barchart"
     }
-  ]
+  ],
+  "refresh": "15s",
+  "schemaVersion": 39,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Traffic CV — Speed Analysis 2",
+  "uid": "traffic-speed-2",
+  "version": 3,
+  "weekStart": ""
 }
