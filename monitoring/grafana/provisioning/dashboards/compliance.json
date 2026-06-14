@@ -1,31 +1,34 @@
 {
-  "title": "Traffic CV — Compliance & Violations",
-  "uid": "traffic-compliance",
-  "version": 1,
-  "schemaVersion": 36,
-  "refresh": "15s",
-  "time": {
-    "from": "now-1h",
-    "to": "now"
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
   },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 13,
+  "links": [],
   "panels": [
     {
-      "id": 1,
-      "title": "Speed Violations",
-      "type": "stat",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": {
-        "x": 0,
-        "y": 0,
-        "w": 6,
-        "h": 6
-      },
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -42,21 +45,35 @@
                 "value": 20
               }
             ]
-          }
-        }
+          },
+          "unit": "short"
+        },
+        "overrides": []
       },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
       "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
+          "fields": "",
           "values": false
         },
-        "colorMode": "background",
-        "graphMode": "none",
+        "showPercentChange": false,
         "textMode": "value_and_name",
-        "orientation": "auto"
+        "wideLayout": true
       },
+      "pluginVersion": "10.4.2",
       "targets": [
         {
           "datasource": {
@@ -64,27 +81,21 @@
             "uid": "prometheus"
           },
           "expr": "sum(speed_violations_total)",
-          "legendFormat": "Speeders"
+          "legendFormat": "Speeders",
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Speed Violations",
+      "type": "stat"
     },
     {
-      "id": 2,
-      "title": "Trucks Outside Far-Left Lane",
-      "type": "stat",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": {
-        "x": 6,
-        "y": 0,
-        "w": 6,
-        "h": 6
-      },
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -101,21 +112,35 @@
                 "value": 30
               }
             ]
-          }
-        }
+          },
+          "unit": "short"
+        },
+        "overrides": []
       },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "id": 2,
       "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
+          "fields": "",
           "values": false
         },
-        "colorMode": "background",
-        "graphMode": "none",
+        "showPercentChange": false,
         "textMode": "value_and_name",
-        "orientation": "auto"
+        "wideLayout": true
       },
+      "pluginVersion": "10.4.2",
       "targets": [
         {
           "datasource": {
@@ -123,27 +148,21 @@
             "uid": "prometheus"
           },
           "expr": "sum(trucks_not_far_left_total)",
-          "legendFormat": "Wrong Lane"
+          "legendFormat": "Wrong Lane",
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Trucks Outside Far-Left Lane",
+      "type": "stat"
     },
     {
-      "id": 3,
-      "title": "Total Violations Combined",
-      "type": "stat",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": {
-        "x": 12,
-        "y": 0,
-        "w": 6,
-        "h": 6
-      },
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -160,20 +179,35 @@
                 "value": 40
               }
             ]
-          }
-        }
+          },
+          "unit": "short"
+        },
+        "overrides": []
       },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "id": 3,
       "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
+          "fields": "",
           "values": false
         },
-        "colorMode": "background",
-        "graphMode": "none",
-        "textMode": "value_and_name"
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": true
       },
+      "pluginVersion": "10.4.2",
       "targets": [
         {
           "datasource": {
@@ -181,29 +215,23 @@
             "uid": "prometheus"
           },
           "expr": "sum(speed_violations_total) + sum(trucks_not_far_left_total)",
-          "legendFormat": "All Violations"
+          "legendFormat": "All Violations",
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Total Violations Combined",
+      "type": "stat"
     },
     {
-      "id": 4,
-      "title": "Avg Speed vs Limit",
-      "type": "gauge",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": {
-        "x": 18,
-        "y": 0,
-        "w": 6,
-        "h": 6
-      },
       "fieldConfig": {
         "defaults": {
-          "unit": "velocitykmh",
-          "min": 0,
+          "mappings": [],
           "max": 130,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -220,19 +248,34 @@
                 "value": 100
               }
             ]
-          }
-        }
+          },
+          "unit": "velocitykmh"
+        },
+        "overrides": []
       },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 4,
       "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
+          "fields": "",
           "values": false
         },
         "showThresholdLabels": true,
-        "showThresholdMarkers": true
+        "showThresholdMarkers": true,
+        "sizing": "auto"
       },
+      "pluginVersion": "10.4.2",
       "targets": [
         {
           "datasource": {
@@ -240,143 +283,89 @@
             "uid": "prometheus"
           },
           "expr": "avg(avg_speed_kmh_per_stream_per_window)",
-          "legendFormat": "Avg Speed"
+          "legendFormat": "Avg Speed",
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Avg Speed vs Limit",
+      "type": "gauge"
     },
     {
-      "id": 5,
-      "title": "Speed Violations Over Time (Q3)",
-      "type": "barchart",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": {
-        "x": 0,
-        "y": 6,
-        "w": 12,
-        "h": 8
-      },
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "red"
-          },
-          "custom": {
-            "fillOpacity": 80,
-            "lineWidth": 0
-          }
-        }
-      },
-      "options": {
-        "orientation": "vertical",
-        "groupWidth": 0.7,
-        "barWidth": 0.9,
-        "xTickLabelRotation": 0,
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "sum(speed_violations_total)",
-          "legendFormat": "Speed Violations",
-          "instant": true
-        }
-      ]
-    },
-    {
-      "id": 6,
-      "title": "Trucks Wrong Lane Over Time (Q8)",
-      "type": "barchart",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 6,
-        "w": 12,
-        "h": 8
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "orange"
-          },
-          "custom": {
-            "fillOpacity": 80,
-            "lineWidth": 0
-          }
-        }
-      },
-      "options": {
-        "orientation": "vertical",
-        "groupWidth": 0.7,
-        "barWidth": 0.9,
-        "xTickLabelRotation": 0,
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "sum(trucks_not_far_left_total)",
-          "legendFormat": "Trucks Wrong Lane",
-          "instant": true
-        }
-      ]
-    },
-    {
-      "id": 7,
-      "title": "All Violations Combined Over Time",
-      "type": "barchart",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 14,
-        "w": 24,
-        "h": 8
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
             "fillOpacity": 80,
-            "lineWidth": 0
-          }
-        }
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 0,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
       },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "id": 7,
       "options": {
-        "orientation": "vertical",
-        "groupWidth": 0.7,
+        "barRadius": 0,
         "barWidth": 0.9,
-        "xTickLabelRotation": 0,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
         "legend": {
+          "calcs": [],
           "displayMode": "list",
-          "placement": "bottom"
-        }
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "vertical",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
       },
       "targets": [
         {
@@ -385,8 +374,9 @@
             "uid": "prometheus"
           },
           "expr": "sum(speed_violations_total)",
+          "instant": true,
           "legendFormat": "Speed Violations",
-          "instant": true
+          "refId": "A"
         },
         {
           "datasource": {
@@ -394,8 +384,9 @@
             "uid": "prometheus"
           },
           "expr": "sum(trucks_not_far_left_total)",
+          "instant": true,
           "legendFormat": "Wrong Lane (Trucks)",
-          "instant": true
+          "refId": "B"
         },
         {
           "datasource": {
@@ -403,10 +394,29 @@
             "uid": "prometheus"
           },
           "expr": "sum(speed_violations_total) + sum(trucks_not_far_left_total)",
+          "instant": true,
           "legendFormat": "Total Violations",
-          "instant": true
+          "refId": "C"
         }
-      ]
+      ],
+      "title": "All Violations Combined Over Time",
+      "type": "barchart"
     }
-  ]
+  ],
+  "refresh": "15s",
+  "schemaVersion": 39,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Traffic CV — Compliance & Violations-2",
+  "uid": "traffic-compliance-2",
+  "version": 3,
+  "weekStart": ""
 }
