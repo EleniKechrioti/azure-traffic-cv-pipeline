@@ -79,7 +79,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(speed_violations_total)",
+          "expr": "sum(speed_violations_total{job=\"analytics_all\"})",
           "legendFormat": "Violations",
           "refId": "A"
         }
@@ -153,7 +153,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "avg by (stream) (avg_speed_kmh_per_stream_per_window)",
+          "expr": "avg by (stream) (avg_speed_kmh_per_stream_per_window{job=\"analytics_all\"})",
           "legendFormat": "{{stream}}",
           "refId": "A"
         }
@@ -219,7 +219,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(trucks_not_far_left_total)",
+          "expr": "sum(trucks_not_far_left_total{job=\"analytics_all\"})",
           "legendFormat": "Total",
           "refId": "A"
         }
@@ -311,7 +311,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "avg by (stream) (truck_percentage_per_stream)",
+          "expr": "avg by (stream) (truck_percentage_per_stream{job=\"analytics_all\"})",
           "instant": true,
           "legendFormat": "{{stream}}",
           "refId": "A"
@@ -403,7 +403,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(speed_violations_total)",
+          "expr": "sum(speed_violations_total{job=\"analytics_all\"})",
           "instant": true,
           "legendFormat": "Violations",
           "refId": "A"

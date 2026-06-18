@@ -30,7 +30,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum(vehicles_per_stream_per_window)",
+          "expr": "sum(vehicles_per_stream_per_window{job=\"analytics_all\"})",
           "legendFormat": "Total"
         }
       ]
@@ -63,7 +63,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "avg(truck_percentage_per_stream)",
+          "expr": "avg(truck_percentage_per_stream{job=\"analytics_all\"})",
           "legendFormat": "Avg Truck %"
         }
       ]
@@ -97,7 +97,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum by (stream) (vehicles_per_stream_per_window)",
+          "expr": "sum by (stream) (vehicles_per_stream_per_window{job=\"analytics_all\"})",
           "legendFormat": "{{stream}}"
         }
       ]
@@ -125,7 +125,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum by (stream, window) (vehicles_per_stream_per_window)",
+          "expr": "sum by (stream, window) (vehicles_per_stream_per_window{job=\"analytics_all\"})",
           "legendFormat": "{{stream}} — {{window}}",
           "instant": true
         }
@@ -156,7 +156,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "avg by (stream) (truck_percentage_per_stream)",
+          "expr": "avg by (stream) (truck_percentage_per_stream{job=\"analytics_all\"})",
           "legendFormat": "{{stream}}",
           "instant": true
         }
@@ -192,7 +192,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "avg by (stream) (truck_percentage_per_stream)",
+          "expr": "avg by (stream) (truck_percentage_per_stream{job=\"analytics_all\"})",
           "legendFormat": "{{stream}}"
         }
       ]

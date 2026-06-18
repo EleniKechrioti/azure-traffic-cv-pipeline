@@ -80,7 +80,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(speed_violations_total)",
+          "expr": "sum(speed_violations_total{job=\"analytics_all\"})",
           "legendFormat": "Speeders",
           "refId": "A"
         }
@@ -147,7 +147,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(trucks_not_far_left_total)",
+          "expr": "sum(trucks_not_far_left_total{job=\"analytics_all\"})",
           "legendFormat": "Wrong Lane",
           "refId": "A"
         }
@@ -214,7 +214,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(speed_violations_total) + sum(trucks_not_far_left_total)",
+          "expr": "sum(speed_violations_total{job=\"analytics_all\"}) + sum(trucks_not_far_left_total{job=\"analytics_all\"})",
           "legendFormat": "All Violations",
           "refId": "A"
         }
@@ -282,7 +282,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "avg(avg_speed_kmh_per_stream_per_window)",
+          "expr": "avg(avg_speed_kmh_per_stream_per_window{job=\"analytics_all\"})",
           "legendFormat": "Avg Speed",
           "refId": "A"
         }
@@ -373,7 +373,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(speed_violations_total)",
+          "expr": "sum(speed_violations_total{job=\"analytics_all\"})",
           "instant": true,
           "legendFormat": "Speed Violations",
           "refId": "A"
@@ -383,7 +383,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(trucks_not_far_left_total)",
+          "expr": "sum(trucks_not_far_left_total{job=\"analytics_all\"})",
           "instant": true,
           "legendFormat": "Wrong Lane (Trucks)",
           "refId": "B"
@@ -393,7 +393,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(speed_violations_total) + sum(trucks_not_far_left_total)",
+          "expr": "sum(speed_violations_total{job=\"analytics_all\"}) + sum(trucks_not_far_left_total{job=\"analytics_all\"})",
           "instant": true,
           "legendFormat": "Total Violations",
           "refId": "C"
